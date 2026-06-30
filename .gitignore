@@ -1,0 +1,12 @@
+# Xmake cache
+.xmake/
+build/
+
+# MacOS Cache
+.DS_Store
+
+# Explicit
+bfc
+main.bf
+brainfuck.c
+brainfucked

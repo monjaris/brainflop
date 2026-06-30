@@ -1,0 +1,11 @@
+#pragma once
+#include <iostream>
+#include <vector>
+#include <string_view>
+#include <fstream>
+#include <utility>
+#include <set>
+#include <stack>
+#include <initializer_list>
+#include <cstdlib>
+#include "defs.hpp"
