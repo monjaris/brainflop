@@ -1,9 +1,12 @@
-#include "bfc/transpiler.hpp"
+#include "transpiler.hpp"
 
 
 Compiler::Compiler (const strv src) {
-    using std::ios;
+    if (!src.ends_with(".bf")) {
+        this->m_panic("File should have '.bf' as extension");
+    }
 
+    using std::ios;
     std::ifstream ifile(src.data(), ios::in | ios::binary | ios::ate);
     if (!ifile) this->m_panic("Could not open file {}", src);
 

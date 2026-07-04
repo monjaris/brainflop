@@ -1,11 +1,16 @@
 [
 {
   "directory": "/home/ziya/dev/main/brainfuck-compiler",
-  "arguments": ["/usr/bin/g++", "-c", "-O0", "-std=c++23", "-I", "build/.objs/bfc/linux/x86_64/debug/include/bfc/cxx", "-include", "common.hpp", "-Iinclude", "-o", "build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o", "src/main.cpp"],
+  "arguments": ["/usr/bin/g++", "-c", "-O0", "-std=c++23", "-I", "build/.objs/bfc/linux/x86_64/debug/include/cxx", "-include", "common.hpp", "-Iinclude", "-o", "build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o", "src/main.cpp"],
   "file": "src/main.cpp"
 },
 {
   "directory": "/home/ziya/dev/main/brainfuck-compiler",
-  "arguments": ["/usr/bin/g++", "-c", "-O0", "-std=c++23", "-I", "build/.objs/bfc/linux/x86_64/debug/include/bfc/cxx", "-include", "common.hpp", "-Iinclude", "-o", "build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o", "src/transpiler.cpp"],
+  "arguments": ["/usr/bin/g++", "-c", "-O0", "-std=c++23", "-I", "build/.objs/bfc/linux/x86_64/debug/include/cxx", "-include", "common.hpp", "-Iinclude", "-o", "build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o", "src/transpiler.cpp"],
   "file": "src/transpiler.cpp"
+},
+{
+  "directory": "/home/ziya/dev/main/brainfuck-compiler",
+  "arguments": ["/usr/bin/g++", "-c", "-O0", "-std=c++23", "-I", "build/.objs/bfc/linux/x86_64/debug/include/cxx", "-include", "common.hpp", "-Iinclude", "-o", "build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o", "src/cli.cpp"],
+  "file": "src/cli.cpp"
 }]

@@ -33,7 +33,7 @@ set_toolchains(".gnu")
 --- GLOBAL
 set_languages("c++23")
 add_includedirs("include/")
-set_pcxxheader("include/bfc/common.hpp")
+set_pcxxheader("include/common.hpp")
 
 --- TARGETS
 target("bfc")
