@@ -6,7 +6,7 @@ build/
 .DS_Store
 
 # Explicit
-bfc
+/bfc
 main.bf
 brainfuck.c
 brainfucked

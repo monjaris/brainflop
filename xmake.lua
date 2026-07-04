@@ -3,7 +3,7 @@ set_arch("x86_64")
 set_plat("linux")
 
 --- RULES/POLICIES
-add_rules("mode.debug", "mode.release"); set_defaultmode("debug")
+add_rules("mode.debug", "mode.release"); set_defaultmode("mode.debug")
 add_rules("plugin.compile_commands.autoupdate")
 
 --- TOOLCHAIN
@@ -33,7 +33,7 @@ set_toolchains(".gnu")
 --- GLOBAL
 set_languages("c++23")
 add_includedirs("include/")
-set_pcxxheader("include/common.hpp")
+set_pcxxheader("include/bfc/common.hpp")
 
 --- TARGETS
 target("bfc")
