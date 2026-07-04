@@ -5,7 +5,8 @@ class Compiler
 {
     enum class GenMode {
         RAW_C,
-        MACRO_C
+        MACRO_C,
+        DENSE_C
     };
     GenMode m_mode = GenMode::RAW_C;
 

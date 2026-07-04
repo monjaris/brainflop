@@ -71,7 +71,10 @@ int32 Compiler::transpile(strv outc) {
     if (!ofile) this->m_panic("Could not open file: {}", outc);
 
     ofile
-        << "#include <stdio.h>\n\n"
+        << "// declare function specifications instead of an include\n"
+        << "int printf(char*, ...);\n"
+        << "int getchar();\n"
+        << "\n"
         << "int main() {\n"
         << INDENT << "unsigned char map[25000] = {0};\n"
         << INDENT << "unsigned char* ptr = map;\n"

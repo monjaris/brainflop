@@ -7,6 +7,6 @@ build/
 
 # Explicit
 /bfc
-main.bf
-brainfuck.c
-brainfucked
+/main.bf
+/brainfuck*
+/TODO.md
