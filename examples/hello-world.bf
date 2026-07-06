@@ -19,3 +19,4 @@
 ----- --- . print 'd'
 > + . print '!'
 > . print '\n'
+q
