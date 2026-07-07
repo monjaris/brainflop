@@ -75,8 +75,8 @@ int32 Compiler::transpile(strv outc) {
 
     ofile
         << "// declare function specifications instead of an include\n"
-        << "int printf(char*, ...);\n"
-        << "int getchar();\n"
+        << codegen_fn_in << "\n"
+        << codegen_fn_out << "\n"
         << "\n"
         << "int main() {\n"
         << INDENT << "unsigned char map[25000] = {0};\n"
@@ -112,15 +112,14 @@ int32 Compiler::transpile(strv outc) {
             // out/in pointer
             case '.': {
                 ofile << "\n";
-                ofile << get_indentation() << "printf(\"%c\", *ptr);\n";
+                ofile << get_indentation() << "out(*ptr);\n";
                 break;
             }
             case ',': {
                 ofile << "\n";
                 ofile
                     << get_indentation()
-                    << "char ch = getchar();" << ' '
-                    << "*ptr = (ch==EOF)?  0 : ch;\n";
+                    << "in(ptr);\n";
                 break;
             }
             // loop

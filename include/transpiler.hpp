@@ -1,8 +1,56 @@
 #pragma once
 #include "core.hpp"
 
+
+
 class Compiler
 {
+    static constexpr strv codegen_fn_out = {
+        "void out(char ch) {\n"
+        "    __asm__ volatile (\n"
+        "        \"mov $1, %%rax\\n\"\n"
+        "        \"mov $1, %%rdi\\n\"\n"
+        "        \"lea %0, %%rsi\\n\"\n"
+        "        \"mov $1, %%rdx\\n\"\n"
+        "        \"syscall\\n\"\n"
+        "        :\n"
+        "        : \"m\"(ch)\n"
+        "        : \"rax\", \"rdi\", \"rsi\", \"rdx\", \"rcx\", \"r11\", \"memory\"\n"
+        "    );\n"
+        "}\n"
+    };
+
+    static constexpr strv codegen_fn_in = {
+        "void in(void* r) {\n"
+        "    __asm__ volatile (\n"
+        "        \"mov $0, %%rax\\n\"\n"
+        "        \"mov $0, %%rdi\\n\"\n"
+        "        \"mov %0, %%rsi\\n\"\n"
+        "        \"mov $1, %%rdx\\n\"\n"
+        "        \"syscall\\n\"\n"
+        "        :\n"
+        "        : \"m\"(r)\n"
+        "        : \"rax\", \"rdi\", \"rsi\", \"rdx\", \"rcx\", \"r11\", \"memory\"\n"
+        "    );\n"
+        "\n"
+        "char junk;\n"
+        "long n;\n"
+        "do {\n"
+        "    __asm__ volatile (\n"
+        "        \"mov $0, %%rax\\n\"\n"
+        "        \"mov $0, %%rdi\\n\"\n"
+        "        \"lea %1, %%rsi\\n\"\n"
+        "        \"mov $1, %%rdx\\n\"\n"
+        "        \"syscall\\n\"\n"
+        "        \"mov %%rax, %0\\n\"\n"
+        "        : \"=r\" (n)\n"
+        "        : \"m\" (junk)\n"
+        "        : \"rax\", \"rdi\", \"rsi\", \"rdx\", \"rcx\", \"r11\", \"memory\"\n"
+        "    );\n"
+        "} while (n == 1 && junk != '\\n');\n"
+        "}\n"
+    };
+
     enum class GenMode {
         RAW_C,
         MACRO_C,
