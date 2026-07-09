@@ -53,7 +53,7 @@ int32 Compiler::transpile(strv outc) {
     static const char INDENT[] = "    ";
     std::ofstream ofile;
 
-    auto get_indentation = [&ofile, this]() {
+    auto get_indentation = [&ofile, this]() ->std::string {
         std::string indentation = INDENT;
         for (uint32 i = 0; i < this->bracket_pairs.size(); ++i) {
             indentation += INDENT;
@@ -74,12 +74,14 @@ int32 Compiler::transpile(strv outc) {
     if (!ofile) this->m_panic("Could not open file: {}", outc);
 
     ofile
-        << "// declare function specifications instead of an include\n"
-        << codegen_fn_in << "\n"
-        << codegen_fn_out << "\n"
+        << "// Forward declare IO functions\n"
+        << codegen_fn_decl_in << "\n"
+        << codegen_fn_decl_out << "\n"
+        << "\n"
+        << "#define MAP_SIZE (" << "25000" << ")\n"
+        << "static unsigned char map[MAP_SIZE] = {0};\n"
         << "\n"
         << "int main() {\n"
-        << INDENT << "unsigned char map[25000] = {0};\n"
         << INDENT << "unsigned char* ptr = map;\n"
         << "\n"
     ;
@@ -109,28 +111,35 @@ int32 Compiler::transpile(strv outc) {
                 ofile << get_indentation() << "(*ptr) -= "<< n <<";\n";
                 continue;
             }
-            // out/in pointer
-            case '.': {
-                ofile << "\n";
-                ofile << get_indentation() << "out(*ptr);\n";
-                break;
-            }
+            // in/out pointer
             case ',': {
-                ofile << "\n";
+                if(get_indentation()==strv(INDENT)) ofile << "\n"; // put nl only if not in loop
                 ofile
                     << get_indentation()
                     << "in(ptr);\n";
                 break;
             }
+            case '.': {
+                ofile << get_indentation() << "out(*ptr);\n";
+                if(get_indentation()==strv(INDENT)) ofile << "\n"; // put nl only if not in loop
+                break;
+            }
             // loop
             case '[': {
+                if (step() && peek()=='-') {
+                    if (step() && peek()==']') {
+                        step();
+                        ofile << get_indentation() << "*ptr = 0;\n";
+                        break;
+                    } else step(-1);
+                } else step(-1);
+
                 ofile << "\n";
                 ofile << get_indentation() << "while (*ptr) {\n";
                 bracket_pairs.push(m_cur);
                 break;
             }
             case ']': {
-                ofile << "\n";
                 bracket_pairs.pop();
                 ofile << get_indentation() << "}\n";
                 break;
@@ -140,6 +149,12 @@ int32 Compiler::transpile(strv outc) {
         step();
     }
 
-    ofile << "\n" << INDENT << "return 0;\n}\n";
+    ofile
+        << "}\n"
+        << "\n\n\n/* Definitions of in() and out() */\n\n"
+        << codegen_fn_def_in
+        << "\n\n"
+        << codegen_fn_def_out
+    ;
     return 0;
 }

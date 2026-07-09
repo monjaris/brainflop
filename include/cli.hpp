@@ -9,9 +9,9 @@ namespace detail {
     inline char** _argv;
 
     inline std::string _out;
-    inline uint32 _opt_lvl = 1;
+    inline int32 _opt_lvl = 1;
 
-    inline std::string _pending_input;
+    inline std::string _input_file;
     inline bool _do_compile = false;
     inline bool _do_build = false;
     inline bool _do_run = false;
@@ -19,14 +19,18 @@ namespace detail {
     inline std::string* out() {
         return &_out;
     }
+
+    inline const char* this_arg() {
+        return optarg;
+    }
 }
 using namespace detail;
 
 namespace o_short {
     enum : unsigned char {
-        COMPILE = 'c', BUILD = 'b', RUN = 'r', OUT = 'o'
+        COMPILE = 'c', BUILD = 'b', RUN = 'r', OUT = 'o', OPT = 'O'
     };
-    inline const char* get_all() { return "c:b:r:o:"; }
+    inline const char* get_all() { return "c:b:r:o:O:"; }
 };
 
 namespace o_long {
@@ -35,6 +39,7 @@ namespace o_long {
         option {"build",   required_argument, nullptr, o_short::BUILD},
         option {"run",     required_argument, nullptr, o_short::RUN},
         option {"out",     required_argument, nullptr, o_short::OUT},
+        option {"optimize",     required_argument, nullptr, o_short::OPT},
         {nullptr, 0, nullptr, 0}
     };
 };
@@ -89,10 +94,31 @@ inline void parse_collect()
     {
         switch (c)
         {
-            case o_short::OUT:     *out() = optarg; break;
-            case o_short::COMPILE: _do_compile = true; _pending_input = optarg; break;
-            case o_short::BUILD:   _do_build = true; _pending_input = optarg; break;
-            case o_short::RUN:     _do_run = true; _pending_input = optarg; break;
+            case o_short::OUT:     *out() = this_arg(); break;
+            case o_short::COMPILE: _do_compile = true; _input_file = this_arg(); break;
+            case o_short::BUILD:   _do_build = true; _input_file = this_arg(); break;
+            case o_short::RUN:     _do_run = true; _input_file = this_arg(); break;
+            case o_short::OPT:     {
+                if (strv(this_arg()).empty()) {
+                    cr::log("Optimization level is empty value! Defaulting to -O1");
+                    _opt_lvl = 1;
+                } else {
+                    try {
+                        _opt_lvl = std::stoi(this_arg());
+                    } catch (const std::exception& e) {
+                        cr::log("Optimization level should be a number! Defaulting to -O1");
+                        _opt_lvl = 1;
+                    }
+                }
+                if (_opt_lvl > 3) {
+                    cr::print("Optimization level cant be more than 3, defaulting to -O3 instead");
+                    _opt_lvl = 3;
+                } else if  (_opt_lvl < 0) {
+                    cr::print("Optimization level cant be less than 0, defaulting to -O0 instead");
+                    _opt_lvl = 0;
+                }
+                break;
+            }
             default: cr::print("Unknown option"); break;
         }
     }
@@ -103,17 +129,17 @@ inline void execute()
     // no getopt_long here at all — just act on what was collected
     if (_do_compile) {
         std::string out_c = !out()->empty() ? *out()
-            : std::string(strv(_pending_input).substr(0, _pending_input.size()-3)) + ".c";
-        cmd::transpile(_pending_input);
-        cr::print("Compiled '", _pending_input, "' to '", out_c, "'");
+            : std::string(strv(_input_file).substr(0, _input_file.size()-3)) + ".c";
+        cmd::transpile(_input_file);
+        cr::print("Compiled \033[35m", _input_file, "\033[0m to \033[32m", out_c, "\033[0m");
     }
     if (_do_build) {
-        auto out_b = cmd::build(_pending_input);
-        cr::print("Built '", _pending_input, "' outputted '", out_b, "'");
+        auto out_b = cmd::build(_input_file);
+        cr::print("Built \033[35m", _input_file, "\033[0m outputted \033[32m", out_b, "\033[0m");
     }
     if (_do_run) {
-        cr::log("Running '", _pending_input, "'");
-        cmd::run(_pending_input);
+        cr::log("Running \033[33m", _input_file, "\033[0m");
+        cmd::run(_input_file);
     }
 }
 
