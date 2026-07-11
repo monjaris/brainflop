@@ -5,10 +5,12 @@
 
 class Compiler
 {
-    static constexpr strv codegen_fn_decl_out = {
+    static constexpr char INDENT[] = "    ";
+
+    static constexpr strview Codegen_Fndecl_Out = {
         "void out(char);"
     };
-    static constexpr strv codegen_fn_def_out = {
+    static constexpr strview Codegen_Fndef_Out = {
         "void out(char ch) {\n"
         "    __asm__ volatile (\n"
         "        \"mov $1, %%rax\\n\"\n"
@@ -23,10 +25,10 @@ class Compiler
         "}\n"
     };
 
-    static constexpr strv codegen_fn_decl_in = {
+    static constexpr strview Codegen_Fndecl_in = {
         "void in(void*);"
     };
-    static constexpr strv codegen_fn_def_in = {
+    static constexpr strview Codegen_Fndef_in = {
         "void in(void* r) {\n"
         "    __asm__ volatile (\n"
         "        \"mov $0, %%rax\\n\"\n"
@@ -57,13 +59,78 @@ class Compiler
         "}\n"
     };
 
-    enum class GenMode {
-        RAW_C,
+    const std::string Codegen_Normal_Begin = std::format(
+        "// Forward declare IO functions\n"
+        "{0}\n"  // func in();
+        "{1}\n"  // func out();
+        "\n"
+        "#define MAP_SIZE ({2})\n"
+        "static unsigned char map[MAP_SIZE] = {{0}};\n"
+        "\n"
+        "int main() {{\n"
+        "{3}unsigned char* ptr = map;\n"  // indent it
+        "\n",
+        Codegen_Fndecl_in, Codegen_Fndecl_Out, 25000, INDENT
+    );
+
+    const std::string Codegen_Macro_Begin = std::format(
+        "// Forward declare IO functions\n"
+        "{0}\n"
+        "{1}\n"
+        "\n"
+        "#define FORWARD(n)  ptr += (n);\n"
+        "#define BACKWARD(n) ptr -= (n);\n"
+        "#define ADD(n)      (*ptr) += (n);\n"
+        "#define SUB(n)      (*ptr) -= (n);\n"
+        "#define READ        in(ptr);\n"
+        "#define WRITE       out(*ptr);\n"
+        "#define LOOP_BEGIN  while (*ptr) {{\n"
+        "#define LOOP_END    }}\n"
+        "\n"
+        "#define MAP_SIZE ({2})\n"
+        "static unsigned char map[MAP_SIZE] = {{0}};\n"
+        "\n"
+        "int main() {{\n"
+        "{3}unsigned char* ptr = map;\n"
+        "\n",
+        Codegen_Fndecl_in, Codegen_Fndecl_Out, 25000, INDENT
+    );
+
+    const std::string Codegen_Dense_Begin = std::format(
+        "{0}{1}"
+        "#define MAP_SIZE ({2})\n"
+        "unsigned char map[MAP_SIZE]={{0}};"
+        "int main(){{unsigned char*ptr=map;",
+        Codegen_Fndecl_in, Codegen_Fndecl_Out, 25000
+    );
+
+
+public:
+    enum class CodeGenMode {
+        NORMAL_C,
         MACRO_C,
         DENSE_C
     };
-    GenMode m_mode = GenMode::RAW_C;
 
+    void setMode(CodeGenMode codegen_mode) { m_mode = codegen_mode; }
+    CodeGenMode getMode() { return m_mode; }
+
+    // possibily throws std::invalid_argument()
+    static CodeGenMode StringToGenMode(strview str) {
+        if (str == "default") {
+            return CodeGenMode::NORMAL_C;
+        } else if (str == "macros") {
+            return CodeGenMode::MACRO_C;
+        } else if (str == "dense" || str == "minimal") {
+            return CodeGenMode::DENSE_C;
+        }
+        else throw std::invalid_argument(std::format("Unexpected value: \"{}\"", str));
+    }
+
+    private: CodeGenMode m_mode = CodeGenMode::NORMAL_C;
+
+
+private:
     static inline const std::set charset = {
         '>', '<', '+', '-', '.', ',', '[', ']'
     };
@@ -101,7 +168,13 @@ class Compiler
     }
 
 public:
-    Compiler (const strv src);
+    Compiler (const strview src);
+
+    void parseInRawMode();
+    void parseInMacroMode();
+    void parseInDenseMode();
+
     int32 preprocess();
-    int32 transpile(strv outc);
+    int32 transpile(strview outc);
 };
+

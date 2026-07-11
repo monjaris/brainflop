@@ -14,4 +14,4 @@ using isize = ssize_t;
 using usize = size_t;
 
 template<class T> using inilist = std::initializer_list<T>;
-using strv = std::basic_string_view<char>;
+using strview = std::basic_string_view<char>;

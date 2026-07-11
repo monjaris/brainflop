@@ -12,6 +12,7 @@ namespace detail {
     inline int32 _opt_lvl = 1;
 
     inline std::string _input_file;
+    inline Compiler::CodeGenMode _gen_mode = Compiler::CodeGenMode::NORMAL_C;
     inline bool _do_compile = false;
     inline bool _do_build = false;
     inline bool _do_run = false;
@@ -28,32 +29,37 @@ using namespace detail;
 
 namespace o_short {
     enum : unsigned char {
-        COMPILE = 'c', BUILD = 'b', RUN = 'r', OUT = 'o', OPT = 'O'
+        OUT = 'o', OPT = 'O', MODE = 'm',
+        COMPILE = 'c', BUILD = 'b', RUN = 'r',
     };
-    inline const char* get_all() { return "c:b:r:o:O:"; }
+    inline const char* get_all() { return "c:b:r:o:m:O:"; }
 };
 
 namespace o_long {
     static const option base[] = {
+        // data flags`
+        option {"out",     required_argument, nullptr, o_short::OUT},
+        option {"optimize",     required_argument, nullptr, o_short::OPT},
+        option {"mode",     required_argument, nullptr, o_short::MODE},
+        // action flags
         option {"compile", required_argument, nullptr, o_short::COMPILE},
         option {"build",   required_argument, nullptr, o_short::BUILD},
         option {"run",     required_argument, nullptr, o_short::RUN},
-        option {"out",     required_argument, nullptr, o_short::OUT},
-        option {"optimize",     required_argument, nullptr, o_short::OPT},
         {nullptr, 0, nullptr, 0}
     };
 };
 
 namespace cmd {
-    inline std::string transpile(const strv file) {
+    inline std::string transpile(const strview file) {
         Compiler bf_tp(file);
+        bf_tp.setMode(detail::_gen_mode);
         bf_tp.preprocess();
         bf_tp.transpile(*out());
         return *out();
     }
 
     inline std::string build(
-        const strv file
+        const strview file
     ) {
         if (out()->empty()) *out() = file.substr(0, file.size()-3).data();
 
@@ -71,7 +77,7 @@ namespace cmd {
     }
 
 
-    inline void run(const strv file) {
+    inline void run(const strview file) {
         *out() = "/tmp/brainflop";
         build(file);
         ::system(std::format(
@@ -94,12 +100,16 @@ inline void parse_collect()
     {
         switch (c)
         {
-            case o_short::OUT:     *out() = this_arg(); break;
             case o_short::COMPILE: _do_compile = true; _input_file = this_arg(); break;
             case o_short::BUILD:   _do_build = true; _input_file = this_arg(); break;
             case o_short::RUN:     _do_run = true; _input_file = this_arg(); break;
-            case o_short::OPT:     {
-                if (strv(this_arg()).empty()) {
+            case o_short::OUT:     *out() = this_arg(); break;
+            case o_short::MODE: {
+                try { _gen_mode = Compiler::StringToGenMode(this_arg()); break; }
+                catch(std::exception& e) { cr::log(e.what()); };
+            }
+            case o_short::OPT: {
+                if (strview(this_arg()).empty()) {
                     cr::log("Optimization level is empty value! Defaulting to -O1");
                     _opt_lvl = 1;
                 } else {
@@ -129,7 +139,7 @@ inline void execute()
     // no getopt_long here at all — just act on what was collected
     if (_do_compile) {
         std::string out_c = !out()->empty() ? *out()
-            : std::string(strv(_input_file).substr(0, _input_file.size()-3)) + ".c";
+            : std::string(strview(_input_file).substr(0, _input_file.size()-3)) + ".c";
         cmd::transpile(_input_file);
         cr::print("Compiled \033[35m", _input_file, "\033[0m to \033[32m", out_c, "\033[0m");
     }

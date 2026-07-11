@@ -10,3 +10,4 @@ build/
 /*.bf
 /*.c
 /TODO.md
+/gen-makefile.sh

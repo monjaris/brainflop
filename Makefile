@@ -7,39 +7,39 @@ VV=@
 endif
 
 CCACHE=/usr/bin/ccache
-GC=/usr/bin/go
-CC=/usr/bin/gcc
 ZC=/usr/bin/zig
-MXX=/usr/bin/g++
-RC=/usr/bin/rustc
-CS=/usr/bin/dotnet
+CC=/usr/bin/gcc
 AS=/usr/bin/gcc
 CXX=/usr/bin/g++
 MM=/usr/bin/gcc
+GC=/usr/bin/go
+MXX=/usr/bin/g++
+CS=/usr/bin/dotnet
+RC=/usr/bin/rustc
 CU=/usr/bin/clang
 
-SH=/usr/bin/g++
-CS=/usr/bin/dotnet
-ZCSH=/usr/bin/zig
-RCSH=/usr/bin/rustc
 LD=/usr/bin/g++
 ZCLD=/usr/bin/zig
-GCLD=/usr/bin/go
 RCLD=/usr/bin/rustc
+CS=/usr/bin/dotnet
+GCLD=/usr/bin/go
 AR=/usr/bin/ar
 ZCAR=/usr/bin/zig
-GCAR=/usr/bin/go
 RCAR=/usr/bin/rustc
+GCAR=/usr/bin/go
+SH=/usr/bin/g++
+ZCSH=/usr/bin/zig
+RCSH=/usr/bin/rustc
 
 bfc_LD=/usr/bin/g++
 bfc_CXX=/usr/bin/g++
 bfc_CXX=/usr/bin/g++
 bfc_CXX=/usr/bin/g++
 
-bfc_CXXFLAGS=-O3 -std=c++23 -I build/.objs/bfc/linux/x86_64/release/include/cxx -include common.hpp -Iinclude -DDEBUG_ON=0 -DNDEBUG
-bfc_CXXFLAGS=-O3 -std=c++23 -I build/.objs/bfc/linux/x86_64/release/include/cxx -include common.hpp -Iinclude -DDEBUG_ON=0 -DNDEBUG
-bfc_CXXFLAGS=-O3 -std=c++23 -I build/.objs/bfc/linux/x86_64/release/include/cxx -include common.hpp -Iinclude -DDEBUG_ON=0 -DNDEBUG
-bfc_LDFLAGS=-s
+bfc_CXXFLAGS=-O0 -std=c++23 -I build/.objs/bfc/linux/x86_64/debug/include/cxx -include common.hpp -Iinclude
+bfc_CXXFLAGS=-O0 -std=c++23 -I build/.objs/bfc/linux/x86_64/debug/include/cxx -include common.hpp -Iinclude
+bfc_CXXFLAGS=-O0 -std=c++23 -I build/.objs/bfc/linux/x86_64/debug/include/cxx -include common.hpp -Iinclude
+bfc_LDFLAGS=
 
 default:  bfc
 
@@ -47,33 +47,33 @@ all:  bfc
 
 .PHONY: default all  bfc
 
-bfc: build/linux/x86_64/release/bfc
-build/linux/x86_64/release/bfc: build/.objs/bfc/linux/x86_64/release/src/main.cpp.o build/.objs/bfc/linux/x86_64/release/src/transpiler.cpp.o build/.objs/bfc/linux/x86_64/release/src/cli.cpp.o
-	@echo linking.release bfc
-	@mkdir -p build/linux/x86_64/release
-	$(VV)$(bfc_LD) -o build/linux/x86_64/release/bfc build/.objs/bfc/linux/x86_64/release/src/main.cpp.o build/.objs/bfc/linux/x86_64/release/src/transpiler.cpp.o build/.objs/bfc/linux/x86_64/release/src/cli.cpp.o $(bfc_LDFLAGS)
+bfc: build/linux/x86_64/debug/bfc
+build/linux/x86_64/debug/bfc: build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o
+	@echo linking.debug bfc
+	@mkdir -p build/linux/x86_64/debug
+	$(VV)$(bfc_LDFLAGS)$(bfc_LD) -o build/linux/x86_64/debug/bfc build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o
 
-build/.objs/bfc/linux/x86_64/release/src/main.cpp.o: src/main.cpp
-	@echo ccache compiling.release src/main.cpp
-	@mkdir -p build/.objs/bfc/linux/x86_64/release/src
-	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/release/src/main.cpp.o src/main.cpp
+build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o: src/main.cpp
+	@echo ccache compiling.debug src/main.cpp
+	@mkdir -p build/.objs/bfc/linux/x86_64/debug/src
+	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o src/main.cpp
 
-build/.objs/bfc/linux/x86_64/release/src/transpiler.cpp.o: src/transpiler.cpp
-	@echo ccache compiling.release src/transpiler.cpp
-	@mkdir -p build/.objs/bfc/linux/x86_64/release/src
-	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/release/src/transpiler.cpp.o src/transpiler.cpp
+build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o: src/transpiler.cpp
+	@echo ccache compiling.debug src/transpiler.cpp
+	@mkdir -p build/.objs/bfc/linux/x86_64/debug/src
+	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o src/transpiler.cpp
 
-build/.objs/bfc/linux/x86_64/release/src/cli.cpp.o: src/cli.cpp
-	@echo ccache compiling.release src/cli.cpp
-	@mkdir -p build/.objs/bfc/linux/x86_64/release/src
-	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/release/src/cli.cpp.o src/cli.cpp
+build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o: src/cli.cpp
+	@echo ccache compiling.debug src/cli.cpp
+	@mkdir -p build/.objs/bfc/linux/x86_64/debug/src
+	$(VV)$(bfc_CXX) -c $(bfc_CXXFLAGS) -o build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o src/cli.cpp
 
 clean:  clean_bfc
 
 clean_bfc: 
-	@rm -rf build/linux/x86_64/release/bfc
-	@rm -rf build/linux/x86_64/release/bfc.sym
-	@rm -rf build/.objs/bfc/linux/x86_64/release/src/main.cpp.o
-	@rm -rf build/.objs/bfc/linux/x86_64/release/src/transpiler.cpp.o
-	@rm -rf build/.objs/bfc/linux/x86_64/release/src/cli.cpp.o
+	@rm -rf build/linux/x86_64/debug/bfc
+	@rm -rf build/linux/x86_64/debug/bfc.sym
+	@rm -rf build/.objs/bfc/linux/x86_64/debug/src/main.cpp.o
+	@rm -rf build/.objs/bfc/linux/x86_64/debug/src/transpiler.cpp.o
+	@rm -rf build/.objs/bfc/linux/x86_64/debug/src/cli.cpp.o
 
