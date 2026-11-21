@@ -1,13 +1,11 @@
-# Xmake cache
+# Build
 .xmake/
 build/
 
 # MacOS Cache
 .DS_Store
 
-# Explicit
+# Other
 /bfc
 /*.bf
 /*.c
-/TODO.md
-/gen-makefile.sh
