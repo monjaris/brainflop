@@ -11,11 +11,12 @@ namespace detail {
     inline std::string _out;
     inline int32 _opt_lvl = 1;
 
-    inline std::string _input_file;
-    inline Compiler::CodeGenMode _gen_mode = Compiler::CodeGenMode::NORMAL_C;
-    inline bool _do_compile = false;
-    inline bool _do_build = false;
-    inline bool _do_run = false;
+    inline constinit std::string _input_file;
+    inline constinit Compiler::CodeGenMode _gen_mode = Compiler::CodeGenMode::NORMAL_C;
+    inline constinit bool _do_help = false;
+    inline constinit bool _do_compile = false;
+    inline constinit bool _do_build = false;
+    inline constinit bool _do_run = false;
 
     inline std::string* out() {
         return &_out;
@@ -29,15 +30,18 @@ using namespace detail;
 
 namespace o_short {
     enum : unsigned char {
-        OUT = 'o', OPT = 'O', MODE = 'm',
+        HELP = 'h', OUT = 'o', OPT = 'O', MODE = 'm',
         COMPILE = 'c', BUILD = 'b', RUN = 'r',
     };
-    inline const char* get_all() { return "c:b:r:o:m:O:"; }
+    inline const char* get_all() { return "h:c:b:r:o:m:O:"; }
 };
 
 namespace o_long {
     static const option base[] = {
-        // data flags`
+        // general flags
+        option { "help", no_argument, nullptr, o_short::HELP },
+
+        // data flags
         option {"out",     required_argument, nullptr, o_short::OUT},
         option {"optimize",     required_argument, nullptr, o_short::OPT},
         option {"mode",     required_argument, nullptr, o_short::MODE},
@@ -50,6 +54,21 @@ namespace o_long {
 };
 
 namespace cmd {
+    inline void print_help() {
+        cr::print(
+            "BrainFlop - fast brainf*ck compiler: https://github.com/monjaris/brainflop \n"
+            "\n"
+            "USAGE:\n"
+            "   -h/--help:  show help\n"
+            "   -r/--run:  run a brainfuck file\n"
+            "   -n/--build:  build a brainfuck file\n"
+            "   -c/--compile:  compile brainfuck code to C file\n"
+            "\n"
+            "   -o/--out:  specify output path\n"
+            "   -O/--optimize:  set optimization level (0, 1, 2, 3)\n"
+        );
+    }
+
     inline std::string transpile(const strview file) {
         Compiler bf_tp(file);
         bf_tp.setMode(detail::_gen_mode);
@@ -93,13 +112,14 @@ inline void init(int argc, char** argv) {
 }
 
 
-inline void parse_collect()
+inline void parse()
 {
     int32 c;
     while ((c = ::getopt_long(_argc, _argv, o_short::get_all(), o_long::base, nullptr)) != -1)
     {
         switch (c)
         {
+            case o_short::HELP:    _do_help = true; break;
             case o_short::COMPILE: _do_compile = true; _input_file = this_arg(); break;
             case o_short::BUILD:   _do_build = true; _input_file = this_arg(); break;
             case o_short::RUN:     _do_run = true; _input_file = this_arg(); break;
@@ -136,21 +156,33 @@ inline void parse_collect()
 
 inline void execute()
 {
-    // no getopt_long here at all — just act on what was collected
-    if (_do_compile) {
-        std::string out_c = !out()->empty() ? *out()
-            : std::string(strview(_input_file).substr(0, _input_file.size()-3)) + ".c";
-        cmd::transpile(_input_file);
-        cr::print("Compiled \033[35m", _input_file, "\033[0m to \033[32m", out_c, "\033[0m");
+    if (_do_help) {
+        cmd::print_help();
     }
-    if (_do_build) {
-        auto out_b = cmd::build(_input_file);
-        cr::print("Built \033[35m", _input_file, "\033[0m outputted \033[32m", out_b, "\033[0m");
+    else
+    {
+        if (_do_compile) {
+            std::string out_c = !out()->empty() ? *out()
+                : std::string(strview(_input_file).substr(0, _input_file.size()-3)) + ".c";
+            cmd::transpile(_input_file);
+            cr::print("Compiled \033[35m", _input_file, "\033[0m to \033[32m", out_c, "\033[0m");
+        }
+
+        if (_do_build) {
+            auto out_b = cmd::build(_input_file);
+            cr::print("Built \033[35m", _input_file, "\033[0m outputted \033[32m", out_b, "\033[0m");
+        }
+
+        if (_do_run) {
+            cr::log("Running \033[33m", _input_file, "\033[0m");
+            cmd::run(_input_file);
+        }
+
+        else {
+            cr::print("pass -h or --help to print usage");
+        }
     }
-    if (_do_run) {
-        cr::log("Running \033[33m", _input_file, "\033[0m");
-        cmd::run(_input_file);
-    }
+
 }
 
 NAMESPACE_END(cli)
