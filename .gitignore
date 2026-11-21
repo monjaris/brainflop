@@ -5,6 +5,9 @@ build/
 # MacOS Cache
 .DS_Store
 
+# Editor/LSP
+/compile_commands.json
+
 # Other
 /bfc
 /*.bf
